@@ -226,7 +226,12 @@ mod platform;
 
 pub mod descriptors;
 mod enumeration;
-#[cfg(any(target_os = "linux", target_os = "macos", target_os = "windows"))]
+#[cfg(any(
+    target_os = "linux",
+    target_os = "android",
+    target_os = "macos",
+    target_os = "windows"
+))]
 pub use enumeration::BusInfo;
 pub use enumeration::{
     DeviceId, DeviceInfo, DeviceSelector, InterfaceInfo, Speed, UsbControllerType,
@@ -240,6 +245,7 @@ pub mod transfer;
 #[cfg(any(
     docsrs,
     target_os = "linux",
+    target_os = "android",
     target_os = "macos",
     target_os = "windows",
     target_arch = "wasm32"
@@ -269,6 +275,7 @@ pub use error::{ActiveConfigurationError, Error, ErrorKind, GetDescriptorError};
 #[cfg(any(
     docsrs,
     target_os = "linux",
+    target_os = "android",
     target_os = "macos",
     target_os = "windows",
     target_arch = "wasm32"
@@ -306,6 +313,7 @@ pub fn list_devices() -> impl MaybeFuture<Output = Result<impl Iterator<Item = D
 /// [Transient User Activation]: https://developer.mozilla.org/en-US/docs/Web/Security/Defenses/User_activation
 #[cfg(any(
     target_os = "linux",
+    target_os = "android",
     target_os = "macos",
     target_os = "windows",
     target_arch = "wasm32"
@@ -347,6 +355,7 @@ pub fn request_device(
 #[cfg(any(
     docsrs,
     target_os = "linux",
+    target_os = "android",
     target_os = "macos",
     target_os = "windows"
 ))]
@@ -392,6 +401,7 @@ pub fn list_buses() -> impl MaybeFuture<Output = Result<impl Iterator<Item = Bus
 #[cfg(any(
     docsrs,
     target_os = "linux",
+    target_os = "android",
     target_os = "macos",
     target_os = "windows",
     target_arch = "wasm32"

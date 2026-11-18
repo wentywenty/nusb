@@ -111,9 +111,31 @@ impl LinuxDevice {
 
     #[cfg(target_os = "android")]
     pub(crate) fn from_device_info(
-        _d: &DeviceInfo,
+        d: &DeviceInfo,
     ) -> impl MaybeFuture<Output = Result<Arc<LinuxDevice>, Error>> {
-        Blocking::new(move || unimplemented!())
+        use rustix::fs::{Mode, OFlags};
+
+        let busnum = d.busnum();
+        let devnum = d.device_address();
+
+        Blocking::new(move || {
+            let path = std::path::PathBuf::from(format!("/dev/bus/usb/{busnum:03}/{devnum:03}"));
+            let fd = rustix::fs::open(&path, OFlags::RDWR | OFlags::CLOEXEC, Mode::empty())
+                .map_err(|e| {
+                    match e {
+                        Errno::NOENT => {
+                            Error::new_os(ErrorKind::Disconnected, "device not found", e)
+                        }
+                        Errno::PERM | Errno::ACCESS => {
+                            Error::new_os(ErrorKind::PermissionDenied, "permission denied", e)
+                        }
+                        e => Error::new_os(ErrorKind::Other, "failed to open device", e),
+                    }
+                    .log_debug()
+                })?;
+
+            Self::create_inner(fd)
+        })
     }
 
     pub(crate) fn from_fd(
